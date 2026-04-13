@@ -2,6 +2,8 @@
 
 `viewcube-react` is a React Three Fiber ViewCube component for CAD-style orientation navigation.
 
+<img width="2749" height="1708" alt="image" src="https://github.com/user-attachments/assets/cf566105-45b0-40b1-a2db-6bd2e91c136c" />
+
 It provides:
 
 - interactive 3D 26-piece orientation cube in a HUD layer
