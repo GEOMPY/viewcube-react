@@ -25,7 +25,11 @@ function resolveFromFocusRef(
   onWarn?: (message: string) => void
 ): THREE.Vector3 | null {
   const obj = focusRef?.current;
-  if (!obj || !(obj instanceof THREE.Object3D)) return null;
+  if (!obj) return null;
+  if (!(obj instanceof THREE.Object3D)) {
+    onWarn?.("[viewcube-react] focusRef.current is not a THREE.Object3D. Falling back.");
+    return null;
+  }
 
   const box = new THREE.Box3().setFromObject(obj);
   if (box.isEmpty()) {

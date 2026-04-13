@@ -43,12 +43,13 @@ function App() {
         <DemoModel modelRef={modelRef} />
         <OrbitControls ref={controlsRef} enableDamping />
         <ViewCube
+          placement="top-left"
           controlsRef={controlsRef}
           focusRef={modelRef}
           onFaceClick={handlePieceClick}
-          showZoom
-          showRotate
-          showPan
+          showZoom={false}
+          showRotate={false}
+          showPan={false}
         />
       </Canvas>
     </main>

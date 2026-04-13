@@ -130,6 +130,7 @@ type ViewCubeOverlayProps = OverlayActionProps & {
   offset?: { x?: number; y?: number };
   className?: string;
   style?: CSSProperties;
+  onWarn?: (message: string) => void;
 };
 
 export function ViewCubeOverlay({
@@ -137,6 +138,7 @@ export function ViewCubeOverlay({
   offset,
   className,
   style,
+  onWarn,
   ...actions
 }: ViewCubeOverlayProps) {
   const { gl } = useThree();
@@ -152,7 +154,10 @@ export function ViewCubeOverlay({
     [placement, offset, style]
   );
 
-  if (!parent) return null;
+  if (!parent) {
+    onWarn?.("[viewcube-react] Overlay portal parent not found. Overlay is skipped.");
+    return null;
+  }
 
   if (!parent.style.position || parent.style.position === "static") {
     parent.style.position = "relative";

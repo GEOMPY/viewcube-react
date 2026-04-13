@@ -44,6 +44,7 @@ export type ViewCubeProps = {
   showZoom?: boolean;
   showRotate?: boolean;
   showPan?: boolean;
+  showFit?: boolean;
   zoomStep?: number;
   labels?: ViewCubeLabels;
   className?: string;

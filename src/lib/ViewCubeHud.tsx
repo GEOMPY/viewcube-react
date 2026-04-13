@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import type { RefObject } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Hud, OrthographicCamera } from "@react-three/drei";
-import type * as THREE from "three";
+import * as THREE from "three";
 import { CubePieces } from "./CubePieces";
 import type { ViewCubeLabels, ViewCubeNavigatePayload, ViewCubePieceMeta } from "./types";
 import { NavigationEngine, isControlsLike } from "./NavigationEngine";
@@ -13,11 +13,14 @@ type ViewCubeHudProps = {
   target?: [number, number, number] | null;
   focusRef?: RefObject<unknown> | null;
   labels?: ViewCubeLabels;
+  placement?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  offset?: { x?: number; y?: number };
   size?: number;
   snapSpeed?: number;
   onFaceClick?: (payload: { coord: [number, number, number]; label: string }) => void;
   onNavigateStart?: (payload: ViewCubeNavigatePayload) => void;
   onNavigateEnd?: (payload: ViewCubeNavigatePayload) => void;
+  snapRequest?: { coord: [number, number, number]; token: number } | null;
 };
 
 export function applyFocusCenterToControls(args: {
@@ -43,13 +46,16 @@ export function ViewCubeHud({
   target,
   focusRef,
   labels,
+  placement = "bottom-right",
+  offset,
   size = 150,
   snapSpeed = 0.12,
   onFaceClick,
   onNavigateStart,
   onNavigateEnd,
+  snapRequest,
 }: ViewCubeHudProps) {
-  const { camera: mainCamera } = useThree();
+  const { camera: mainCamera, size: canvasSize } = useThree();
   const cubeGroupRef = useRef<THREE.Group | null>(null);
   const engineRef = useRef(new NavigationEngine({ snapLerp: snapSpeed }));
 
@@ -70,6 +76,22 @@ export function ViewCubeHud({
       ...(warn ? { onWarn: warn } : {}),
     });
   }, [controlsRef, focusRef, warn]);
+
+  useEffect(() => {
+    if (!snapRequest) return;
+    const resolvedTarget = resolveTarget({
+      ...(focusRef !== undefined ? { focusRef } : {}),
+      ...(target !== undefined ? { target } : {}),
+      ...(controlsRef !== undefined ? { controlsRef } : {}),
+      ...(warn ? { onWarn: warn } : {}),
+    });
+    engineRef.current.snapToCoord({
+      coord: snapRequest.coord,
+      target: resolvedTarget,
+      camera: mainCamera,
+      onEnd: () => onNavigateEnd?.({ reason: "face-click" }),
+    });
+  }, [snapRequest, focusRef, target, controlsRef, mainCamera, onNavigateEnd, warn]);
   
   const handlePieceClick = (piece: ViewCubePieceMeta) => {
     onFaceClick?.({ coord: piece.coord, label: piece.label });
@@ -100,16 +122,35 @@ export function ViewCubeHud({
     }
   });
 
+  const cubePosition = useMemo(() => {
+    const hudZoom = size / 10;
+    const halfW = canvasSize.width / (2 * hudZoom);
+    const halfH = canvasSize.height / (2 * hudZoom);
+    const marginX = (offset?.x ?? 16) / hudZoom;
+    const marginY = (offset?.y ?? 16) / hudZoom;
+    // Covers the cube extents while preserving a small visual breathing space.
+    const cubeRadius = 1.8;
+    const x = placement.includes("right")
+      ? halfW - cubeRadius - marginX
+      : -halfW + cubeRadius + marginX;
+    const y = placement.includes("top")
+      ? halfH - cubeRadius - marginY
+      : -halfH + cubeRadius + marginY;
+    return new THREE.Vector3(x, y, 0);
+  }, [canvasSize.width, canvasSize.height, size, placement, offset]);
+
   return (
     <Hud>
       <OrthographicCamera makeDefault position={[0, 0, 10]} zoom={size / 10} />
       <ambientLight intensity={0.8} />
       <directionalLight position={[2, 2, 2]} intensity={1.2} />
-      <CubePieces
-        {...(labels !== undefined ? { labels } : {})}
-        onPieceClick={handlePieceClick}
-        groupRef={cubeGroupRef}
-      />
+      <group position={cubePosition}>
+        <CubePieces
+          {...(labels !== undefined ? { labels } : {})}
+          onPieceClick={handlePieceClick}
+          groupRef={cubeGroupRef}
+        />
+      </group>
     </Hud>
   );
 }
