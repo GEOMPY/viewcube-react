@@ -1,10 +1,10 @@
 import * as THREE from "three";
-import type { MutableRefObject } from "react";
+import type { RefObject } from "react";
 
 export type ResolveTargetArgs = {
-  focusRef?: MutableRefObject<unknown> | null;
+  focusRef?: RefObject<unknown> | null;
   target?: [number, number, number] | null;
-  controlsRef?: MutableRefObject<unknown> | null;
+  controlsRef?: RefObject<unknown> | null;
   onWarn?: (message: string) => void;
 };
 
@@ -34,6 +34,13 @@ function resolveFromFocusRef(
   }
 
   return box.getCenter(new THREE.Vector3());
+}
+
+export function resolveFocusCenter(
+  focusRef: ResolveTargetArgs["focusRef"],
+  onWarn?: (message: string) => void
+): THREE.Vector3 | null {
+  return resolveFromFocusRef(focusRef, onWarn);
 }
 
 function resolveFromControlsRef(controlsRef: ResolveTargetArgs["controlsRef"]): THREE.Vector3 | null {

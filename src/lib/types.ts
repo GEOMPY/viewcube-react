@@ -1,4 +1,5 @@
-import type { CSSProperties, MutableRefObject } from "react";
+import type { CSSProperties, RefObject } from "react";
+import type * as THREE from "three";
 
 export type ViewCubePlacement =
   | "top-left"
@@ -26,28 +27,24 @@ export type ViewCubePieceMeta = {
 };
 
 export type ViewCubeNavigatePayload = {
-  reason: "face-click" | "home" | "fit" | "zoom" | "rotate" | "pan";
+  reason: "face-click" | "zoom" | "rotate" | "pan";
 };
 
 export type ViewCubeLabels = Partial<Record<string, string>>;
 
 export type ViewCubeProps = {
-  controlsRef?: MutableRefObject<unknown>;
-  viewCubeRef?: MutableRefObject<ViewCubeHandle | null>;
+  controlsRef?: RefObject<unknown>;
+  viewCubeRef?: RefObject<ViewCubeHandle | null>;
   size?: number;
   placement?: ViewCubePlacement;
   offset?: { x?: number; y?: number };
   snapSpeed?: number;
   target?: ViewCubeCoord | null;
-  focusRef?: MutableRefObject<unknown> | null;
+  focusRef?: RefObject<unknown> | null;
   showZoom?: boolean;
-  showHome?: boolean;
   showRotate?: boolean;
   showPan?: boolean;
-  showFit?: boolean;
   zoomStep?: number;
-  rotateStepDeg?: number;
-  panStepWorld?: number;
   labels?: ViewCubeLabels;
   className?: string;
   style?: CSSProperties;
@@ -60,5 +57,6 @@ export type CubePiecesProps = {
   labels?: ViewCubeLabels;
   dragThresholdPx?: number;
   onPieceClick?: (piece: ViewCubePieceMeta) => void;
+  groupRef?: RefObject<THREE.Group | null>;
 };
   

@@ -1,30 +1,34 @@
 import { useRef, useState } from "react";
+import type { RefObject } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
+import type { Group } from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import { CubePieces } from "./lib/CubePieces";
-import type { ViewCubePieceMeta } from "./lib/types";
+import { ViewCube } from "./lib/ViewCube";
 
-function DemoModel() {
+function DemoModel({ modelRef }: { modelRef: RefObject<Group | null> }) {
   return (
     <>
       <ambientLight intensity={0.8} />
       <directionalLight position={[4, 6, 5]} intensity={1.2} />
 
       {/* Mesh behind the cube to validate event isolation via stopPropagation */}
-      <mesh position={[0, 0, -4]}>
-        <torusKnotGeometry args={[1.2, 0.35, 120, 16]} />
-        <meshStandardMaterial color="#7f8c8d" />
-      </mesh>
+      <group ref={modelRef}>
+        <mesh position={[0, 0, -4]}>
+          <torusKnotGeometry args={[1.2, 0.35, 120, 16]} />
+          <meshStandardMaterial color="#7f8c8d" />
+        </mesh>
+      </group>
     </>
   );
 }
 
 function App() {
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
+  const modelRef = useRef<Group | null>(null);
   const [lastClicked, setLastClicked] = useState<string>("None");
 
-  const handlePieceClick = (piece: ViewCubePieceMeta) => {
+  const handlePieceClick = (piece: { coord: [number, number, number]; label: string }) => {
     const label = piece.label;
     const coord = piece.coord.join(", ");
     setLastClicked(`${label} [${coord}]`);
@@ -36,9 +40,16 @@ function App() {
         Last cube click: {lastClicked}
       </div>
       <Canvas camera={{ position: [6, 6, 8], fov: 50 }}>
-        <DemoModel />
-        <CubePieces onPieceClick={handlePieceClick} />
+        <DemoModel modelRef={modelRef} />
         <OrbitControls ref={controlsRef} enableDamping />
+        <ViewCube
+          controlsRef={controlsRef}
+          focusRef={modelRef}
+          onFaceClick={handlePieceClick}
+          showZoom
+          showRotate
+          showPan
+        />
       </Canvas>
     </main>
   );

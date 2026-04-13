@@ -1,4 +1,6 @@
 export { ViewCube } from "./lib/ViewCube";
+export { ViewCubeHud } from "./lib/ViewCubeHud";
+export { ViewCubeOverlay, ViewCubeActions, getOverlayWrapperStyle, getActionButtonStyle, resolvePortalParent } from "./lib/ViewCubeOverlay";
 export { CubePieces, createCubePieceDefs } from "./lib/CubePieces";
 export {
   VC_OFFSET,
@@ -25,6 +27,8 @@ export {
 } from "./lib/math/cameraMath";
 export { orientationForPiece } from "./lib/math/orientationMath";
 export { resolveTarget } from "./lib/TargetResolver";
+export { NavigationEngine, isControlsLike } from "./lib/NavigationEngine";
+export { applyFocusCenterToControls } from "./lib/ViewCubeHud";
 export type {
   ViewCubeProps,
   ViewCubePlacement,

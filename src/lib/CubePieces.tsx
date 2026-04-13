@@ -78,6 +78,7 @@ export function CubePieces({
   labels,
   dragThresholdPx = DRAG_THRESHOLD_PX,
   onPieceClick,
+  groupRef,
 }: CubePiecesProps) {
   const pieces = useMemo(() => createCubePieceDefs(labels), [labels]);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -112,7 +113,7 @@ export function CubePieces({
   }, [faceGeo, edgeGeo, cornerGeo, faceTextures]);
 
   return (
-    <group>
+    <group ref={groupRef ?? null}>
       {pieces.map((piece) => {
         const { position, quaternion } = orientationForPiece(piece.coord, piece.type);
         const geometry = piece.type === "face" ? faceGeo : piece.type === "edge" ? edgeGeo : cornerGeo;
