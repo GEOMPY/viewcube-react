@@ -19,7 +19,15 @@ export default defineConfig({
       fileName: () => "index.js",
     },
     rollupOptions: {
-      external: ["react", "react-dom", "three", "@react-three/fiber", "@react-three/drei"],
+        external: [
+          "react",
+          "react/jsx-runtime",
+          "react/jsx-dev-runtime",
+          "react-dom",
+          "three",
+          "@react-three/fiber",
+          "@react-three/drei",
+        ],
     },
   },
 });
