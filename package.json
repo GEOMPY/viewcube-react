@@ -1,0 +1,73 @@
+{
+  "name": "viewcube-react",
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && npm run check:dts && npm run check:exports",
+    "typecheck": "tsc --noEmit -p tsconfig.build.json",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "check:peers": "node ./scripts/check-peer-deps.mjs",
+    "check:entries": "node ./scripts/check-entry-files.mjs",
+    "check:exports": "node ./scripts/check-exports.mjs",
+    "check:dts": "node ./scripts/check-dts.mjs",
+    "phase0:check": "npm run check:peers && npm run check:entries",
+    "phase1:check": "npm run typecheck && npm run build"
+  },
+  "peerDependencies": {
+    "@react-three/drei": ">=9",
+    "@react-three/fiber": ">=8",
+    "react": ">=18",
+    "react-dom": ">=18",
+    "three": ">=0.150.0"
+  },
+  "peerDependenciesMeta": {
+    "@react-three/drei": {
+      "optional": false
+    },
+    "@react-three/fiber": {
+      "optional": false
+    },
+    "react": {
+      "optional": false
+    },
+    "react-dom": {
+      "optional": false
+    },
+    "three": {
+      "optional": false
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@react-three/drei": "^10.7.6",
+    "@react-three/fiber": "^9.4.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "three": "^0.180.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.4",
+    "vite-plugin-dts": "^4.5.4"
+  }
+}
