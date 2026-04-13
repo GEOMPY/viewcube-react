@@ -1,4 +1,5 @@
 export { ViewCube } from "./lib/ViewCube";
+export { CubePieces, createCubePieceDefs } from "./lib/CubePieces";
 export {
   VC_OFFSET,
   VC_FACE_W,
@@ -22,6 +23,8 @@ export {
   rotateCameraAroundTarget,
   panCameraAndTarget,
 } from "./lib/math/cameraMath";
+export { orientationForPiece } from "./lib/math/orientationMath";
+export { resolveTarget } from "./lib/TargetResolver";
 export type {
   ViewCubeProps,
   ViewCubePlacement,
@@ -30,4 +33,8 @@ export type {
   ViewCubeFaceClickPayload,
   ViewCubeNavigatePayload,
   ViewCubeLabels,
+  ViewCubePieceMeta,
+  ViewCubePieceType,
+  CubePiecesProps,
 } from "./lib/types";
+export type { ResolveTargetArgs } from "./lib/TargetResolver";

@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
 const EPS = 1e-9;
+const ISO_DIRECTION = new THREE.Vector3(1, 1, 1).normalize();
 
 function ensureFiniteVector3(v: THREE.Vector3, name: string): void {
   if (!Number.isFinite(v.x) || !Number.isFinite(v.y) || !Number.isFinite(v.z)) {
@@ -27,10 +28,13 @@ export function zoomCameraRelativeToTarget(
   return target.clone().add(relative.multiplyScalar(factor));
 }
 
-export function fitDistanceForFov(size: THREE.Vector3, fovDeg: number, padding = 1.2): number {
+export function fitDistanceForFov(size: THREE.Vector3, fovDeg: number, aspect = 1, padding = 1.2): number {
   ensureFiniteVector3(size, "size");
   if (!Number.isFinite(fovDeg) || fovDeg <= 0 || fovDeg >= 180) {
     throw new Error("fovDeg must be in range (0, 180).");
+  }
+  if (!Number.isFinite(aspect) || aspect <= 0) {
+    throw new Error("aspect must be a finite positive number.");
   }
   if (!Number.isFinite(padding) || padding <= 0) {
     throw new Error("padding must be a finite positive number.");
@@ -38,9 +42,12 @@ export function fitDistanceForFov(size: THREE.Vector3, fovDeg: number, padding =
 
   const maxDim = Math.max(Math.abs(size.x), Math.abs(size.y), Math.abs(size.z));
   if (maxDim <= EPS) return padding;
-  // Vertical FOV framing approximation: distance = half-extent / tan(fov/2).
-  const fovRad = THREE.MathUtils.degToRad(fovDeg);
-  const distance = (maxDim * 0.5) / Math.tan(fovRad * 0.5);
+  // In portrait view, effective fitting FOV is tighter after accounting for aspect.
+  let fitFovRad = THREE.MathUtils.degToRad(fovDeg);
+  if (aspect < 1) {
+    fitFovRad = 2 * Math.atan(Math.tan(fitFovRad / 2) * aspect);
+  }
+  const distance = (maxDim * 0.5) / Math.tan(fitFovRad * 0.5);
   return distance * padding;
 }
 
@@ -50,8 +57,7 @@ export function computeHomePosition(target: THREE.Vector3, distance: number): TH
     throw new Error("distance must be a finite positive number.");
   }
   // Use standard isometric direction so home view is consistent across modules.
-  const isoDirection = new THREE.Vector3(1, 1, 1).normalize();
-  return target.clone().addScaledVector(isoDirection, distance);
+  return target.clone().addScaledVector(ISO_DIRECTION, distance);
 }
 
 export function rotateCameraAroundTarget(
@@ -66,6 +72,7 @@ export function rotateCameraAroundTarget(
     throw new Error("degrees must be finite.");
   }
 
+  // World-axis rotation is intentional for deterministic helper behavior.
   const axisVec =
     axis === "x"
       ? new THREE.Vector3(1, 0, 0)

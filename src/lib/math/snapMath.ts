@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { VC_LABELS } from "../constants";
+import type { ViewCubeCoord } from "../types";
 
 export type SnapResult = {
   position: THREE.Vector3;
@@ -7,16 +8,16 @@ export type SnapResult = {
   label: string;
 };
 
-export function keyFromCoord(coord: [number, number, number]): string {
+export function keyFromCoord(coord: ViewCubeCoord): string {
   return `${coord[0]},${coord[1]},${coord[2]}`;
 }
 
-export function labelFromCoord(coord: [number, number, number]): string {
+export function labelFromCoord(coord: ViewCubeCoord): string {
   const key = keyFromCoord(coord);
   return VC_LABELS[key] ?? key;
 }
 
-export function snapFromCoord(coord: [number, number, number]): SnapResult {
+export function snapFromCoord(coord: ViewCubeCoord): SnapResult {
   const [cx, cy, cz] = coord;
   const len = Math.sqrt(cx * cx + cy * cy + cz * cz);
 

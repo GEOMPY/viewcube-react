@@ -7,12 +7,20 @@ export type ViewCubePlacement =
   | "bottom-right";
 
 export type ViewCubeCoord = [number, number, number];
+export type ViewCubePieceType = "face" | "edge" | "corner";
 
 export type ViewCubeHandle = {
   snapTo: (coord: ViewCubeCoord) => void;
 };
 
 export type ViewCubeFaceClickPayload = {
+  coord: ViewCubeCoord;
+  label: string;
+};
+
+export type ViewCubePieceMeta = {
+  id: string;
+  type: ViewCubePieceType;
   coord: ViewCubeCoord;
   label: string;
 };
@@ -47,3 +55,10 @@ export type ViewCubeProps = {
   onNavigateStart?: (payload: ViewCubeNavigatePayload) => void;
   onNavigateEnd?: (payload: ViewCubeNavigatePayload) => void;
 };
+
+export type CubePiecesProps = {
+  labels?: ViewCubeLabels;
+  dragThresholdPx?: number;
+  onPieceClick?: (piece: ViewCubePieceMeta) => void;
+};
+  
