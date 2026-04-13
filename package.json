@@ -19,6 +19,7 @@
     "dev": "vite",
     "build": "vite build && npm run check:dts && npm run check:exports",
     "typecheck": "tsc --noEmit -p tsconfig.build.json",
+    "test": "vitest run",
     "lint": "eslint .",
     "preview": "vite preview",
     "check:peers": "node ./scripts/check-peer-deps.mjs",
@@ -26,7 +27,8 @@
     "check:exports": "node ./scripts/check-exports.mjs",
     "check:dts": "node ./scripts/check-dts.mjs",
     "phase0:check": "npm run check:peers && npm run check:entries",
-    "phase1:check": "npm run typecheck && npm run build"
+    "phase1:check": "npm run typecheck && npm run build",
+    "phase2:check": "npm run typecheck && npm run test"
   },
   "peerDependencies": {
     "@react-three/drei": ">=9",
@@ -68,6 +70,7 @@
     "three": "^0.180.0",
     "typescript": "^5.9.3",
     "vite": "^8.0.4",
-    "vite-plugin-dts": "^4.5.4"
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^3.2.4"
   }
 }
