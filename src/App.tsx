@@ -46,10 +46,9 @@ function App() {
           placement="top-right"
           controlsRef={controlsRef}
           focusRef={modelRef}
+          scale={1.4}
+          theme="auto"
           onFaceClick={handlePieceClick}
-          // showZoom={false}
-          // showRotate={false}
-          // showPan={false}
         />
       </Canvas>
     </main>

@@ -1,6 +1,6 @@
 export { ViewCube } from "./lib/ViewCube";
 export { ViewCubeHud } from "./lib/ViewCubeHud";
-export { ViewCubeOverlay, ViewCubeActions, getOverlayWrapperStyle, getActionButtonStyle, resolvePortalParent } from "./lib/ViewCubeOverlay";
+export { ViewCubeOverlay, getOverlayWrapperStyle, resolvePortalParent } from "./lib/ViewCubeOverlay";
 export { CubePieces, createCubePieceDefs } from "./lib/CubePieces";
 export {
   VC_OFFSET,

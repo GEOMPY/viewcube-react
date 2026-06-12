@@ -33,32 +33,28 @@ describe("ViewCube public component", () => {
     vi.restoreAllMocks();
   });
 
-  it("normalizes default props for overlay toggles", async () => {
+  it("normalizes default props for theme and size", async () => {
     await act(async () => {
       create(<ViewCube />);
     });
 
-    expect(overlayProps).toBeTruthy();
-    expect(overlayProps?.showZoom).toBe(true);
-    expect(overlayProps?.showRotate).toBe(true);
-    expect(overlayProps?.showPan).toBe(true);
+    expect(hudProps).toBeTruthy();
+    expect(hudProps?.theme).toBe("dark");
+    expect(hudProps?.size).toBe(150);
   });
 
-  it("wires navigate callback contract for overlay actions", async () => {
-    const onNavigateStart = vi.fn();
-    const onNavigateEnd = vi.fn();
-
+  it("wires navigate callback contract for overlay control click", async () => {
     await act(async () => {
-      create(<ViewCube onNavigateStart={onNavigateStart} onNavigateEnd={onNavigateEnd} />);
+      create(<ViewCube />);
     });
 
-    expect(typeof overlayProps?.onZoomIn).toBe("function");
+    expect(typeof hudProps?.onControlClick).toBe("function");
     await act(async () => {
-      (overlayProps?.onZoomIn as (() => void) | undefined)?.();
+      (hudProps?.onControlClick as ((action: string) => void) | undefined)?.("orbit_u");
     });
 
-    expect(onNavigateStart).toHaveBeenCalledWith({ reason: "zoom" });
-    expect(onNavigateEnd).toHaveBeenCalledWith({ reason: "zoom" });
+    expect(hudProps?.controlRequest).toBeTruthy();
+    expect((hudProps?.controlRequest as { action: string }).action).toBe("orbit_u");
   });
 
   it("passes face callback through HUD payload shape", async () => {
@@ -77,22 +73,13 @@ describe("ViewCube public component", () => {
     const badFocusRef = { current: 1 } as unknown as React.RefObject<unknown>;
 
     await act(async () => {
-      create(<ViewCube target={[1, 2, Number.NaN]} showFit focusRef={badFocusRef} />);
+      create(<ViewCube target={[1, 2, Number.NaN]} focusRef={badFocusRef} />);
     });
 
     const messages = warn.mock.calls.map((call) => String(call[0]));
     expect(messages.some((m) => m.includes("controlsRef is not provided"))).toBe(true);
     expect(messages.some((m) => m.includes("Invalid target tuple"))).toBe(true);
     expect(messages.some((m) => m.includes("focusRef.current is not an object"))).toBe(true);
-  });
-
-  it("warns when showFit is enabled without focusRef", async () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    await act(async () => {
-      create(<ViewCube showFit />);
-    });
-    const messages = warn.mock.calls.map((call) => String(call[0]));
-    expect(messages.some((m) => m.includes("showFit enabled without focusRef"))).toBe(true);
   });
 
   it("exposes imperative viewCubeRef snapTo and forwards snap request", async () => {
@@ -111,24 +98,41 @@ describe("ViewCube public component", () => {
     expect((hudProps?.snapRequest as { coord: ViewCubeCoord }).coord).toEqual(coord);
   });
 
+  it("forwards home and orbit step props to the HUD", async () => {
+    const homeDir: ViewCubeCoord = [1, 1, 1];
+    const homeUp: ViewCubeCoord = [0, 1, 0];
+    await act(async () => {
+      create(<ViewCube homeDir={homeDir} homeUp={homeUp} orbitStepDeg={20} scale={1.25} />);
+    });
+
+    expect(hudProps?.homeDir).toEqual(homeDir);
+    expect(hudProps?.homeUp).toEqual(homeUp);
+    expect(hudProps?.orbitStepDeg).toBe(20);
+    expect(hudProps?.scale).toBe(1.25);
+  });
+
   it("applies className and style escape hatch to overlay", async () => {
     const style = { zIndex: 1234 };
     await act(async () => {
       create(<ViewCube className="host-class" style={style} />);
     });
 
-    expect(overlayProps?.className).toBe("host-class");
-    expect(overlayProps?.style).toEqual(style);
+    expect(hudProps?.className).toBe("host-class");
+    expect(hudProps?.style).toEqual(style);
   });
 
   it("type-level public API compile check", () => {
     const props: ViewCubeProps = {
       placement: "bottom-right",
       offset: { x: 10, y: 12 },
-      zoomStep: 1.1,
       onFaceClick: (_payload: ViewCubeFaceClickPayload) => {},
       viewCubeRef: { current: null as ViewCubeHandle | null },
+      theme: "light",
+      orbitStepDeg: 15,
+      homeDir: [0, 1, 0],
+      homeUp: [0, 0, 1],
     };
     expect(props.placement).toBe("bottom-right");
+    expect(props.theme).toBe("light");
   });
 });

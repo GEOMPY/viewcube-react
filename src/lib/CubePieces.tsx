@@ -74,12 +74,20 @@ export function createCubePieceDefs(labels?: Partial<Record<string, string>>): P
   return out;
 }
 
-export function CubePieces({
-  labels,
-  dragThresholdPx = DRAG_THRESHOLD_PX,
-  onPieceClick,
-  groupRef,
-}: CubePiecesProps) {
+function getHitScale(type: ViewCubePieceType): number {
+  if (type === "corner") return 2.2;
+  if (type === "edge") return 1.8;
+  return 1.0;
+}
+
+export function CubePieces(props: CubePiecesProps & { scale?: number }) {
+  const {
+    labels,
+    dragThresholdPx = DRAG_THRESHOLD_PX,
+    onPieceClick,
+    groupRef,
+    scale = 1,
+  } = props;
   const pieces = useMemo(() => createCubePieceDefs(labels), [labels]);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
@@ -113,79 +121,83 @@ export function CubePieces({
   }, [faceGeo, edgeGeo, cornerGeo, faceTextures]);
 
   return (
-    <group ref={groupRef ?? null}>
+    <group ref={groupRef ?? null} scale={[scale, scale, scale]}>
       {pieces.map((piece) => {
         const { position, quaternion } = orientationForPiece(piece.coord, piece.type);
         const geometry = piece.type === "face" ? faceGeo : piece.type === "edge" ? edgeGeo : cornerGeo;
+        const hitScale = getHitScale(piece.type);
 
         return (
-          <mesh
+          <group
             key={piece.key}
-            geometry={geometry}
             position={position}
             quaternion={quaternion}
-            onPointerEnter={(event: ThreeEvent<PointerEvent>) => {
-              event.stopPropagation();
-              setHoveredId(piece.id);
-            }}
-            onPointerLeave={(event: ThreeEvent<PointerEvent>) => {
-              event.stopPropagation();
-              setHoveredId((id) => (id === piece.id ? null : id));
-            }}
-            onPointerDown={(event: ThreeEvent<PointerEvent>) => {
-              event.stopPropagation();
-              dragStateRef.current = {
-                startX: event.clientX ?? 0,
-                startY: event.clientY ?? 0,
-                dragged: false,
-              };
-            }}
-            onPointerMove={(event: ThreeEvent<PointerEvent>) => {
-              event.stopPropagation();
-              const s = dragStateRef.current;
-              if (!s) return;
-              const x = event.clientX ?? s.startX;
-              const y = event.clientY ?? s.startY;
-              if (Math.hypot(x - s.startX, y - s.startY) > dragThresholdPx) {
-                s.dragged = true;
-              }
-            }}
-            onPointerUp={(event: ThreeEvent<PointerEvent>) => {
-              event.stopPropagation();
-              const s = dragStateRef.current;
-              if (s && !s.dragged) onPieceClick?.(piece);
-              dragStateRef.current = null;
-            }}
-            userData={{
-              id: piece.id,
-              type: piece.type,
-              coord: piece.coord,
-              label: piece.label,
-            }}
+            userData={{ id: piece.id, type: piece.type, coord: piece.coord, label: piece.label }}
           >
-            {piece.type === "face" ? (
-              <meshStandardMaterial
-                emissive={hoveredId === piece.id ? VC_COL_HOVER : 0x000000}
-                map={faceTextures[piece.id] ?? null}
-                roughness={0.3}
-                metalness={0.05}
-              />
-            ) : piece.type === "edge" ? (
-              <meshStandardMaterial
-                color={VC_COL_EDGE}
-                emissive={hoveredId === piece.id ? VC_COL_HOVER : 0x000000}
-                roughness={0.5}
-                metalness={0}
-              />
-            ) : (
-              <meshStandardMaterial
-                color={VC_COL_CORNER}
-                emissive={hoveredId === piece.id ? VC_COL_HOVER : 0x000000}
-                roughness={0.5}
-                metalness={0}
-              />
-            )}
-          </mesh>
+            <mesh
+              geometry={geometry}
+              scale={hitScale}
+              onPointerEnter={(event: ThreeEvent<PointerEvent>) => {
+                event.stopPropagation();
+                setHoveredId(piece.id);
+              }}
+              onPointerLeave={(event: ThreeEvent<PointerEvent>) => {
+                event.stopPropagation();
+                setHoveredId((id) => (id === piece.id ? null : id));
+              }}
+              onPointerDown={(event: ThreeEvent<PointerEvent>) => {
+                event.stopPropagation();
+                dragStateRef.current = {
+                  startX: event.clientX ?? 0,
+                  startY: event.clientY ?? 0,
+                  dragged: false,
+                };
+              }}
+              onPointerMove={(event: ThreeEvent<PointerEvent>) => {
+                event.stopPropagation();
+                const s = dragStateRef.current;
+                if (!s) return;
+                const x = event.clientX ?? s.startX;
+                const y = event.clientY ?? s.startY;
+                if (Math.hypot(x - s.startX, y - s.startY) > dragThresholdPx) {
+                  s.dragged = true;
+                }
+              }}
+              onPointerUp={(event: ThreeEvent<PointerEvent>) => {
+                event.stopPropagation();
+                const s = dragStateRef.current;
+                if (s && !s.dragged) onPieceClick?.(piece);
+                dragStateRef.current = null;
+              }}
+            >
+              <meshBasicMaterial visible={false} />
+            </mesh>
+
+            <mesh geometry={geometry}>
+              {piece.type === "face" ? (
+                <meshStandardMaterial
+                  emissive={hoveredId === piece.id ? VC_COL_HOVER : 0x000000}
+                  map={faceTextures[piece.id] ?? null}
+                  roughness={0.3}
+                  metalness={0.05}
+                />
+              ) : piece.type === "edge" ? (
+                <meshStandardMaterial
+                  color={VC_COL_EDGE}
+                  emissive={hoveredId === piece.id ? VC_COL_HOVER : 0x000000}
+                  roughness={0.5}
+                  metalness={0}
+                />
+              ) : (
+                <meshStandardMaterial
+                  color={VC_COL_CORNER}
+                  emissive={hoveredId === piece.id ? VC_COL_HOVER : 0x000000}
+                  roughness={0.5}
+                  metalness={0}
+                />
+              )}
+            </mesh>
+          </group>
         );
       })}
     </group>

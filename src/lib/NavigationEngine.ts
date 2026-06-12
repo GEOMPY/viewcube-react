@@ -203,6 +203,98 @@ export class NavigationEngine {
     };
   }
 
+  orbitOrRoll(args: {
+    camera: THREE.Camera;
+    controls?: ControlsLike | null | undefined;
+    target: THREE.Vector3;
+    action: "orbit_u" | "orbit_d" | "orbit_l" | "orbit_r" | "roll_ccw" | "roll_cw" | "backside" | "home";
+    orbitStepDeg?: number | undefined;
+    homeDir?: ViewCubeCoord | undefined;
+    homeUp?: ViewCubeCoord | undefined;
+    onEnd?: (() => void) | undefined;
+  }): void {
+    const { camera, controls, target, action, orbitStepDeg = 15, homeDir, homeUp, onEnd } = args;
+
+    if (action === "home") {
+      const radius = (controls ? controls.object.position : camera.position).distanceTo(target);
+      const defaultHomeDir = new THREE.Vector3(-1, -1, -1).normalize();
+      const defaultHomeUp = new THREE.Vector3(0, 1, 0);
+
+      const hDir = homeDir
+        ? new THREE.Vector3(homeDir[0], homeDir[1], homeDir[2]).normalize()
+        : defaultHomeDir;
+      const hUp = homeUp
+        ? new THREE.Vector3(homeUp[0], homeUp[1], homeUp[2]).normalize()
+        : defaultHomeUp;
+
+      const targetPosition = target.clone().sub(hDir.multiplyScalar(radius));
+      this.snap = {
+        targetPosition,
+        targetUp: hUp,
+        lookAt: target.clone(),
+        ...(onEnd ? { onEnd } : {}),
+      };
+      return;
+    }
+
+    const pos = (controls ? controls.object.position : camera.position).clone();
+    const radius = pos.distanceTo(target);
+    const D = target.clone().sub(pos).normalize();
+    const U = (controls ? controls.object.up : camera.up).clone().normalize();
+
+    let R = D.clone().cross(U);
+    if (R.lengthSq() < 1e-6) {
+      const fallbackUp = Math.abs(D.y) > 0.95 ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(0, 1, 0);
+      R = D.clone().cross(fallbackUp);
+    }
+    R.normalize();
+
+    const orthoU = R.clone().cross(D).normalize();
+
+    const step = (orbitStepDeg * Math.PI) / 180;
+    const nd = D.clone();
+    const nu = orthoU.clone();
+
+    switch (action) {
+      case "orbit_u":
+        nd.applyAxisAngle(R, -step);
+        nu.applyAxisAngle(R, -step);
+        break;
+      case "orbit_d":
+        nd.applyAxisAngle(R, step);
+        nu.applyAxisAngle(R, step);
+        break;
+      case "orbit_l":
+        nd.applyAxisAngle(new THREE.Vector3(0, 1, 0), -step);
+        nu.applyAxisAngle(new THREE.Vector3(0, 1, 0), -step);
+        break;
+      case "orbit_r":
+        nd.applyAxisAngle(new THREE.Vector3(0, 1, 0), step);
+        nu.applyAxisAngle(new THREE.Vector3(0, 1, 0), step);
+        break;
+      case "roll_ccw":
+        nu.applyAxisAngle(D, step);
+        break;
+      case "roll_cw":
+        nu.applyAxisAngle(D, -step);
+        break;
+      case "backside":
+        nd.negate();
+        break;
+    }
+
+    nd.normalize();
+    nu.normalize();
+
+    const targetPosition = target.clone().sub(nd.multiplyScalar(radius));
+    this.snap = {
+      targetPosition,
+      targetUp: nu,
+      lookAt: target.clone(),
+      ...(onEnd ? { onEnd } : {}),
+    };
+  }
+
   startSnap(args: { coord: ViewCubeCoord; target: THREE.Vector3; camera: THREE.Camera; onEnd?: () => void }): void {
     this.snapToCoord(args);
   }

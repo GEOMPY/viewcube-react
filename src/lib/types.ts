@@ -27,7 +27,7 @@ export type ViewCubePieceMeta = {
 };
 
 export type ViewCubeNavigatePayload = {
-  reason: "face-click" | "zoom" | "rotate" | "pan";
+  reason: "face-click" | "orbit" | "roll" | "backside" | "home";
 };
 
 export type ViewCubeLabels = Partial<Record<string, string>>;
@@ -36,16 +36,16 @@ export type ViewCubeProps = {
   controlsRef?: RefObject<unknown>;
   viewCubeRef?: RefObject<ViewCubeHandle | null>;
   size?: number;
+  scale?: number;
   placement?: ViewCubePlacement;
   offset?: { x?: number; y?: number };
   snapSpeed?: number;
   target?: ViewCubeCoord | null;
   focusRef?: RefObject<unknown> | null;
-  showZoom?: boolean;
-  showRotate?: boolean;
-  showPan?: boolean;
-  showFit?: boolean;
-  zoomStep?: number;
+  theme?: "light" | "dark" | "auto";
+  homeDir?: ViewCubeCoord;
+  homeUp?: ViewCubeCoord;
+  orbitStepDeg?: number;
   labels?: ViewCubeLabels;
   className?: string;
   style?: CSSProperties;
@@ -59,5 +59,6 @@ export type CubePiecesProps = {
   dragThresholdPx?: number;
   onPieceClick?: (piece: ViewCubePieceMeta) => void;
   groupRef?: RefObject<THREE.Group | null>;
+  scale?: number;
 };
   

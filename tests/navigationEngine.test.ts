@@ -152,6 +152,31 @@ describe("NavigationEngine", () => {
     expect(controls.target.distanceTo(beforeTarget)).toBeGreaterThan(0.01);
   });
 
+  it("orbitOrRoll starts a snap animation state with target pose", () => {
+    const engine = new NavigationEngine();
+    const camera = makeCamera();
+    const controls = makeControls(camera);
+    const target = new THREE.Vector3(0, 0, 0);
+
+    engine.orbitOrRoll({
+      camera,
+      controls,
+      target,
+      action: "orbit_u",
+      orbitStepDeg: 15,
+    });
+
+    expect(engine.hasActiveSnap()).toBe(true);
+
+    let done = false;
+    for (let i = 0; i < 120; i += 1) {
+      done = engine.update(camera, controls);
+      if (done) break;
+    }
+    expect(done).toBe(true);
+    expect(engine.hasActiveSnap()).toBe(false);
+  });
+
   it("snapToCoord converges with controls and fallback parity", () => {
     const engineWithControls = new NavigationEngine({ snapLerp: 0.4, snapEps: 0.0001 });
     const engineFallback = new NavigationEngine({ snapLerp: 0.4, snapEps: 0.0001 });
@@ -184,5 +209,73 @@ describe("NavigationEngine", () => {
     expect(result).toBe(false);
     expect(camera.position.toArray()).toEqual(beforePos.toArray());
     expect(camera.up.toArray()).toEqual(beforeUp.toArray());
+  });
+
+  it("orbit_l and orbit_r rotate camera correctly around global Y", () => {
+    const engine = new NavigationEngine({ snapLerp: 1.0 });
+    const camera = makeCamera();
+    const target = new THREE.Vector3(0, 0, 0);
+
+    camera.position.set(0, 0, 10);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(target);
+
+    engine.orbitOrRoll({
+      camera,
+      target,
+      action: "orbit_l",
+      orbitStepDeg: 15,
+    });
+    engine.update(camera, null);
+
+    expect(camera.position.x).toBeLessThan(0);
+
+    camera.position.set(0, 0, 10);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(target);
+
+    engine.orbitOrRoll({
+      camera,
+      target,
+      action: "orbit_r",
+      orbitStepDeg: 15,
+    });
+    engine.update(camera, null);
+
+    expect(camera.position.x).toBeGreaterThan(0);
+  });
+
+  it("roll_ccw and roll_cw rotate camera up vector correctly", () => {
+    const engine = new NavigationEngine({ snapLerp: 1.0 });
+    const camera = makeCamera();
+    const target = new THREE.Vector3(0, 0, 0);
+
+    camera.position.set(0, 0, 10);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(target);
+
+    engine.orbitOrRoll({
+      camera,
+      target,
+      action: "roll_ccw",
+      orbitStepDeg: 15,
+    });
+    engine.update(camera, null);
+
+    expect(camera.up.x).toBeGreaterThan(0);
+
+    camera.position.set(0, 0, 10);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(target);
+
+    engine.orbitOrRoll({
+      camera,
+      target,
+      action: "roll_cw",
+      orbitStepDeg: 15,
+    });
+    engine.update(camera, null);
+
+    expect(camera.up.x).toBeLessThan(0);
   });
 });

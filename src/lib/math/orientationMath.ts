@@ -57,7 +57,8 @@ function upHintForCorner([, y]: ViewCubeCoord): THREE.Vector3 {
 
 export function orientationForPiece(coord: ViewCubeCoord, type: ViewCubePieceType): OrientationResult {
   const [x, y, z] = coord;
-  const position = new THREE.Vector3(x * VC_OFFSET, y * VC_OFFSET, z * VC_OFFSET);
+  const offset = type === "face" ? VC_OFFSET : 0.92;
+  const position = new THREE.Vector3(x * offset, y * offset, z * offset);
   const forward = new THREE.Vector3(x, y, z);
 
   const upHint =

@@ -7,6 +7,7 @@ import { CubePieces } from "./CubePieces";
 import type { ViewCubeLabels, ViewCubeNavigatePayload, ViewCubePieceMeta } from "./types";
 import { NavigationEngine, isControlsLike } from "./NavigationEngine";
 import { resolveFocusCenter, resolveTarget } from "./TargetResolver";
+import { ViewCubeOverlay } from "./ViewCubeOverlay";
 
 type ViewCubeHudProps = {
   controlsRef?: RefObject<unknown>;
@@ -16,11 +17,20 @@ type ViewCubeHudProps = {
   placement?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
   offset?: { x?: number; y?: number };
   size?: number;
+  scale?: number;
   snapSpeed?: number;
   onFaceClick?: (payload: { coord: [number, number, number]; label: string }) => void;
   onNavigateStart?: (payload: ViewCubeNavigatePayload) => void;
   onNavigateEnd?: (payload: ViewCubeNavigatePayload) => void;
   snapRequest?: { coord: [number, number, number]; token: number } | null;
+  controlRequest?: { action: string; token: number } | null;
+  orbitStepDeg?: number | undefined;
+  homeDir?: [number, number, number] | undefined;
+  homeUp?: [number, number, number] | undefined;
+  theme?: "light" | "dark" | "auto" | undefined;
+  onControlClick?: ((action: string) => void) | undefined;
+  className?: string | undefined;
+  style?: React.CSSProperties | undefined;
 };
 
 export function applyFocusCenterToControls(args: {
@@ -49,11 +59,20 @@ export function ViewCubeHud({
   placement = "bottom-right",
   offset,
   size = 150,
+  scale = 1,
   snapSpeed = 0.12,
   onFaceClick,
   onNavigateStart,
   onNavigateEnd,
   snapRequest,
+  controlRequest,
+  orbitStepDeg,
+  homeDir,
+  homeUp,
+  theme,
+  onControlClick,
+  className,
+  style,
 }: ViewCubeHudProps) {
   const { camera: mainCamera, size: canvasSize } = useThree();
   const cubeGroupRef = useRef<THREE.Group | null>(null);
@@ -92,6 +111,34 @@ export function ViewCubeHud({
       onEnd: () => onNavigateEnd?.({ reason: "face-click" }),
     });
   }, [snapRequest, focusRef, target, controlsRef, mainCamera, onNavigateEnd, warn]);
+
+  useEffect(() => {
+    if (!controlRequest) return;
+    const resolvedTarget = resolveTarget({
+      ...(focusRef !== undefined ? { focusRef } : {}),
+      ...(target !== undefined ? { target } : {}),
+      ...(controlsRef !== undefined ? { controlsRef } : {}),
+      ...(warn ? { onWarn: warn } : {}),
+    });
+
+    let reason: "orbit" | "roll" | "backside" | "home" = "orbit";
+    if (controlRequest.action.startsWith("roll")) reason = "roll";
+    else if (controlRequest.action === "backside") reason = "backside";
+    else if (controlRequest.action === "home") reason = "home";
+
+    onNavigateStart?.({ reason });
+
+    engineRef.current.orbitOrRoll({
+      camera: mainCamera,
+      controls: isControlsLike(controlsRef?.current) ? controlsRef.current : null,
+      target: resolvedTarget,
+      action: controlRequest.action as any,
+      orbitStepDeg,
+      homeDir,
+      homeUp,
+      onEnd: () => onNavigateEnd?.({ reason }),
+    });
+  }, [controlRequest, focusRef, target, controlsRef, mainCamera, orbitStepDeg, homeDir, homeUp, onNavigateStart, onNavigateEnd, warn]);
   
   const handlePieceClick = (piece: ViewCubePieceMeta) => {
     onFaceClick?.({ coord: piece.coord, label: piece.label });
@@ -128,14 +175,13 @@ export function ViewCubeHud({
     const halfH = canvasSize.height / (2 * hudZoom);
     const marginX = (offset?.x ?? 16) / hudZoom;
     const marginY = (offset?.y ?? 16) / hudZoom;
-    // Covers the cube extents while preserving a small visual breathing space.
-    const cubeRadius = 1.8;
+    const halfSizeUnit = 5;
     const x = placement.includes("right")
-      ? halfW - cubeRadius - marginX
-      : -halfW + cubeRadius + marginX;
+      ? halfW - halfSizeUnit - marginX
+      : -halfW + halfSizeUnit + marginX;
     const y = placement.includes("top")
-      ? halfH - cubeRadius - marginY
-      : -halfH + cubeRadius + marginY;
+      ? halfH - halfSizeUnit - marginY
+      : -halfH + halfSizeUnit + marginY;
     return new THREE.Vector3(x, y, 0);
   }, [canvasSize.width, canvasSize.height, size, placement, offset]);
 
@@ -149,6 +195,15 @@ export function ViewCubeHud({
           {...(labels !== undefined ? { labels } : {})}
           onPieceClick={handlePieceClick}
           groupRef={cubeGroupRef}
+          scale={scale}
+        />
+        <ViewCubeOverlay
+          size={size}
+          theme={theme}
+          onControlClick={onControlClick}
+          className={className}
+          style={style}
+          onWarn={warn}
         />
       </group>
     </Hud>
