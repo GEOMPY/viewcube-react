@@ -50,6 +50,44 @@ function makeLabelTexture(text: string): THREE.Texture {
   return new THREE.CanvasTexture(canvas);
 }
 
+function createOctagonGeometry(width: number, cut: number, depth: number): THREE.ExtrudeGeometry {
+  const shape = new THREE.Shape();
+  const half = width / 2;
+
+  shape.moveTo(half - cut, half);
+  shape.lineTo(-half + cut, half);
+  shape.lineTo(-half, half - cut);
+  shape.lineTo(-half, -half + cut);
+  shape.lineTo(-half + cut, -half);
+  shape.lineTo(half - cut, -half);
+  shape.lineTo(half, -half + cut);
+  shape.lineTo(half, half - cut);
+  shape.closePath();
+
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: depth,
+    bevelEnabled: false,
+  });
+
+  geometry.center();
+
+  const posAttr = geometry.getAttribute("position");
+  const uvAttr = geometry.getAttribute("uv");
+  if (posAttr && uvAttr) {
+    for (let i = 0; i < posAttr.count; i++) {
+      const x = posAttr.getX(i);
+      const y = posAttr.getY(i);
+      const u = x / width + 0.5;
+      const v = y / width + 0.5;
+      uvAttr.setXY(i, u, v);
+    }
+    uvAttr.needsUpdate = true;
+  }
+
+  return geometry;
+}
+
+
 export function createCubePieceDefs(labels?: Partial<Record<string, string>>): PieceDef[] {
   const out: PieceDef[] = [];
   for (let x = -1; x <= 1; x += 1) {
@@ -75,8 +113,8 @@ export function createCubePieceDefs(labels?: Partial<Record<string, string>>): P
 }
 
 function getHitScale(type: ViewCubePieceType): number {
-  if (type === "corner") return 2.2;
-  if (type === "edge") return 1.8;
+  if (type === "corner") return 1.0;
+  if (type === "edge") return 1.0;
   return 1.0;
 }
 
@@ -93,10 +131,20 @@ export function CubePieces(props: CubePiecesProps & { scale?: number }) {
 
   const dragStateRef = useRef<{ startX: number; startY: number; dragged: boolean } | null>(null);
 
-  const faceGeo = useMemo(() => new THREE.BoxGeometry(VC_FACE_W, VC_FACE_W, VC_DEPTH), []);
-  const edgeGeo = useMemo(() => new THREE.BoxGeometry(VC_EDGE_W, VC_EDGE_LENGTH, VC_DEPTH), []);
+  const faceGeo = useMemo(() => {
+    const cut = VC_EDGE_W / Math.SQRT2;
+    return createOctagonGeometry(VC_FACE_W, cut, VC_DEPTH);
+  }, []);
+
+  const edgeGeo = useMemo(() => {
+    const cut = VC_EDGE_W / Math.SQRT2;
+    const edgeLength = VC_FACE_W - 2 * cut;
+    return new THREE.BoxGeometry(VC_EDGE_W, edgeLength, VC_DEPTH);
+  }, []);
+
   const cornerGeo = useMemo(() => {
-    const geo = new THREE.CylinderGeometry(VC_CORNER_R, VC_CORNER_R, VC_DEPTH, 3);
+    const geo = new THREE.CylinderGeometry(VC_EDGE_W, VC_EDGE_W, VC_DEPTH, 6);
+    geo.rotateY(Math.PI / 6);
     geo.rotateX(Math.PI / 2);
     return geo;
   }, []);

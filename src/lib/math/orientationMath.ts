@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { VC_OFFSET } from "../constants";
+import { VC_FACE_W, VC_EDGE_W, VC_CORNER_R, VC_DEPTH } from "../constants";
 import type { ViewCubeCoord, ViewCubePieceType } from "../types";
 
 type OrientationResult = {
@@ -57,7 +57,22 @@ function upHintForCorner([, y]: ViewCubeCoord): THREE.Vector3 {
 
 export function orientationForPiece(coord: ViewCubeCoord, type: ViewCubePieceType): OrientationResult {
   const [x, y, z] = coord;
-  const offset = type === "face" ? VC_OFFSET : 0.92;
+
+  const R = VC_FACE_W / 2 + VC_EDGE_W / Math.SQRT2;
+  const FACE_OFFSET = R - VC_DEPTH / 2;
+  const EDGE_OFFSET = VC_FACE_W / 2 + (VC_EDGE_W - VC_DEPTH) / (2 * Math.SQRT2);
+
+  const cut = VC_EDGE_W / Math.SQRT2;
+  const cornerX = VC_FACE_W / 2 - cut;
+  const CORNER_OFFSET = (cornerX + 2 * EDGE_OFFSET + VC_DEPTH / Math.SQRT2 - (Math.sqrt(3) / 2) * VC_DEPTH) / 3;
+
+  const offset =
+    type === "face"
+      ? FACE_OFFSET
+      : type === "edge"
+      ? EDGE_OFFSET
+      : CORNER_OFFSET;
+
   const position = new THREE.Vector3(x * offset, y * offset, z * offset);
   const forward = new THREE.Vector3(x, y, z);
 

@@ -36,7 +36,7 @@ function App() {
 
   return (
     <main style={{ width: "100%", height: "100vh", margin: 0, fontFamily: "sans-serif" }}>
-      <div style={{ position: "absolute", top: 12, left: 12, zIndex: 10, background: "#111", color: "#fff", padding: "8px 10px", borderRadius: 6, fontSize: 13 }}>
+      <div style={{ position: "absolute", top: 12, left: 12, zIndex: 10, background: "#fff", color: "#000", padding: "8px 10px", borderRadius: 6, fontSize: 13 }}>
         Last cube click: {lastClicked}
       </div>
       <Canvas camera={{ position: [6, 6, 8], fov: 50 }}>
@@ -46,8 +46,9 @@ function App() {
           placement="top-right"
           controlsRef={controlsRef}
           focusRef={modelRef}
-          scale={1.4}
-          theme="auto"
+          // TODO: scale should also change the scale of those 8 buttons
+          scale={3}
+          theme="light"
           onFaceClick={handlePieceClick}
         />
       </Canvas>

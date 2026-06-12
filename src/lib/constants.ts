@@ -1,13 +1,17 @@
-export const VC_OFFSET = 1.15;
-export const VC_FACE_W = 1.58;
-export const VC_EDGE_LENGTH = 1.58;
-export const VC_EDGE_W = 0.3;
-export const VC_DEPTH = 0.26;
-export const VC_CORNER_R = 0.3;
+export const VC_TOTAL = 1.0;
+export const SLOT = VC_TOTAL / 3;
 
-export const VC_COL_EDGE = 0xcccccc;
-export const VC_COL_CORNER = 0x999999;
-export const VC_COL_HOVER = 0x00c8ff;
+// change this value to change cube shape
+export const VC_FACE_W = 0.75;
+export const VC_EDGE_LENGTH = VC_FACE_W;
+export const VC_EDGE_W = Math.SQRT2 * (0.5 - VC_FACE_W / 2);
+export const VC_DEPTH = 0.10;
+export const VC_CORNER_R = VC_EDGE_W * 0.5;
+
+export const VC_COL_EDGE = 0xe4e4e7;
+export const VC_COL_CORNER = 0xa1a1aa;
+export const VC_COL_HOVER = 0x2563eb;
+export const VC_OFFSET = 0.5 - VC_DEPTH / 2;
 
 export const VC_LABELS: Record<string, string> = {
   "0,1,0": "TOP",
