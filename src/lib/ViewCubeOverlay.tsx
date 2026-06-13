@@ -8,6 +8,7 @@ type ViewCubeOverlayProps = {
   placement?: ViewCubePlacement | undefined;
   offset?: { x?: number; y?: number } | undefined;
   size?: number | undefined;
+  scale?: number | undefined;
   theme?: "light" | "dark" | "auto" | undefined;
   onControlClick?: ((action: string) => void) | undefined;
   className?: string | undefined;
@@ -137,6 +138,7 @@ export function ViewCubeOverlay({
   placement,
   offset,
   size = 150,
+  scale = 1,
   theme = "dark",
   onControlClick,
   className,
@@ -148,13 +150,15 @@ export function ViewCubeOverlay({
   const resolvedTheme = useThemeMode(theme);
   const [hoveredAction, setHoveredAction] = useState<string | null>(null);
 
+  const scaledSize = size * scale;
+
   const wrapperStyle = useMemo(
     () =>
       getOverlayWrapperStyle({
-        size,
+        size: scaledSize,
         style,
       }),
-    [size, style]
+    [scaledSize, style]
   );
 
   if (!parent) {
@@ -234,8 +238,8 @@ export function ViewCubeOverlay({
     >
       <div className={className} style={{ pointerEvents: "none", width: "100%", height: "100%" }}>
         <svg
-          width={size}
-          height={size}
+          width={scaledSize}
+          height={scaledSize}
           viewBox="0 0 200 200"
           style={{
             display: "block",
@@ -243,7 +247,9 @@ export function ViewCubeOverlay({
             overflow: "visible",
           }}
         >
-          {BUTTONS.map(btn => renderButton(btn.action, btn.points, btn.title, btn.isCircle))}
+          <g transform="translate(100, 100) scale(0.70) translate(-100, -100)">
+            {BUTTONS.map(btn => renderButton(btn.action, btn.points, btn.title, btn.isCircle))}
+          </g>
         </svg>
       </div>
     </Html>

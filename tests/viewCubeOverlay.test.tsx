@@ -86,4 +86,26 @@ describe("ViewCubeOverlay SVG controls", () => {
     expect(onControlClick).toHaveBeenCalledWith("orbit_u");
     expect(mockEvent.stopPropagation).toHaveBeenCalledTimes(1);
   });
+
+  it("applies scale to wrapper style and SVG dimensions", async () => {
+    let renderer: ReturnType<typeof create> | null = null;
+    await act(async () => {
+      renderer = create(
+        <ViewCubeOverlay
+          placement="bottom-right"
+          size={150}
+          scale={3}
+        />
+      );
+    });
+
+    const root = renderer!.root;
+    const htmlDiv = root.findByType("div");
+    expect(htmlDiv.props.style.width).toBe("450px");
+    expect(htmlDiv.props.style.height).toBe("450px");
+
+    const svg = root.findByType("svg");
+    expect(svg.props.width).toBe(450);
+    expect(svg.props.height).toBe(450);
+  });
 });

@@ -187,7 +187,7 @@ export function ViewCubeHud({
 
   return (
     <Hud>
-      <OrthographicCamera makeDefault position={[0, 0, 10]} zoom={size / 10} />
+      <OrthographicCamera makeDefault position={[0, 0, 10]} zoom={size / 2} />
       <ambientLight intensity={0.8} />
       <directionalLight position={[2, 2, 2]} intensity={1.2} />
       <group position={cubePosition}>
@@ -199,6 +199,7 @@ export function ViewCubeHud({
         />
         <ViewCubeOverlay
           size={size}
+          scale={scale}
           theme={theme}
           onControlClick={onControlClick}
           className={className}
