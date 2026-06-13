@@ -26,7 +26,7 @@ async function main() {
   }
 
   const requiredSnippets = [
-    "<ViewCube controlsRef={controlsRef} focusRef={modelRef} showFit />",
+    "<ViewCube controlsRef={controlsRef} focusRef={modelRef} />",
     "<OrbitControls ref={controlsRef} makeDefault />",
     "### With `focusRef`",
     "### Without Controls",
@@ -39,9 +39,6 @@ async function main() {
   const requiredPropNames = [
     "`controlsRef?: RefObject<unknown>`",
     "`viewCubeRef?: RefObject<ViewCubeHandle | null>`",
-    "`showZoom?: boolean`",
-    "`showRotate?: boolean`",
-    "`showPan?: boolean`",
     "`className?: string`",
     "`style?: React.CSSProperties`",
   ];

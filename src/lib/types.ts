@@ -61,4 +61,3 @@ export type CubePiecesProps = {
   groupRef?: RefObject<THREE.Group | null>;
   scale?: number;
 };
-  

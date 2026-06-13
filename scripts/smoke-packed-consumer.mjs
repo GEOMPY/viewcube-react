@@ -71,7 +71,7 @@ async function main() {
         `import type { ViewCubeProps } from "${packageName}";`,
         `import { ViewCube } from "${packageName}";`,
         "",
-        'const props: ViewCubeProps = { placement: "top-right", showZoom: true };',
+        'const props: ViewCubeProps = { placement: "top-right", theme: "light" };',
         "void props;",
         "void ViewCube;",
         "",

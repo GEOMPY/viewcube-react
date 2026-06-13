@@ -83,11 +83,6 @@ If `controlsRef` is not passed, `ViewCube` still works using direct camera fallb
 - `snapSpeed?: number`
 - `target?: [number, number, number] | null`
 - `focusRef?: RefObject<unknown> | null`
-- `showZoom?: boolean` (default `true`)
-- `showRotate?: boolean` (default `true`)
-- `showPan?: boolean` (default `true`)
-- `showFit?: boolean` (default `false`, currently warning-only guard)
-- `zoomStep?: number` (default `1.1`)
 - `labels?: Partial<Record<string, string>>`
 - `className?: string`
 - `style?: React.CSSProperties`
@@ -153,11 +148,9 @@ const controlsRef = useRef();
 <Canvas>
   <MyModel ref={modelRef} />
   <OrbitControls ref={controlsRef} makeDefault />
-  <ViewCube controlsRef={controlsRef} focusRef={modelRef} showFit />
+  <ViewCube controlsRef={controlsRef} focusRef={modelRef} />
 </Canvas>;
 ```
-
-> `showFit` is currently a guarded compatibility prop; without `focusRef`, fit remains disabled by design and logs a development warning.
 
 ## Troubleshooting
 
