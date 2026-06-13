@@ -2,6 +2,9 @@
   "name": "@geo-mpy/viewcube-react",
   "version": "1.0.0",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "dist"
   ],
