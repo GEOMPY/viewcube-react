@@ -47,7 +47,7 @@ function App() {
           controlsRef={controlsRef}
           focusRef={modelRef}
           // TODO: scale should also change the scale of those 8 buttons
-          scale={3}
+          scale={1}
           theme="light"
           onFaceClick={handlePieceClick}
         />

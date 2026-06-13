@@ -170,12 +170,12 @@ export function ViewCubeHud({
   });
 
   const cubePosition = useMemo(() => {
-    const hudZoom = size / 10;
+    const hudZoom = size * 0.375;
     const halfW = canvasSize.width / (2 * hudZoom);
     const halfH = canvasSize.height / (2 * hudZoom);
     const marginX = (offset?.x ?? 16) / hudZoom;
     const marginY = (offset?.y ?? 16) / hudZoom;
-    const halfSizeUnit = 5;
+    const halfSizeUnit = (4 / 3) * scale;
     const x = placement.includes("right")
       ? halfW - halfSizeUnit - marginX
       : -halfW + halfSizeUnit + marginX;
@@ -183,11 +183,11 @@ export function ViewCubeHud({
       ? halfH - halfSizeUnit - marginY
       : -halfH + halfSizeUnit + marginY;
     return new THREE.Vector3(x, y, 0);
-  }, [canvasSize.width, canvasSize.height, size, placement, offset]);
+  }, [canvasSize.width, canvasSize.height, size, scale, placement, offset]);
 
   return (
     <Hud>
-      <OrthographicCamera makeDefault position={[0, 0, 10]} zoom={size / 2} />
+      <OrthographicCamera makeDefault position={[0, 0, 10]} zoom={size * 0.375} />
       <ambientLight intensity={0.8} />
       <directionalLight position={[2, 2, 2]} intensity={1.2} />
       <group position={cubePosition}>
